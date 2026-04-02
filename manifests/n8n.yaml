@@ -1,0 +1,85 @@
+
+apiVersion: apps/v1
+
+kind: Deployment
+
+metadata:
+
+  name: n8n
+
+  namespace: default
+
+spec:
+
+  replicas: 1
+
+  selector:
+
+    matchLabels:
+
+      app: n8n
+
+  template:
+
+    metadata:
+
+      labels:
+
+        app: n8n
+
+    spec:
+
+      nodeSelector:
+
+        kubernetes.io/hostname: huntersmachinegun
+
+      containers:
+
+        - name: n8n
+
+          image: n8nio/n8n:latest
+
+          env:
+
+            - name: N8N_HOST
+
+              value: "localhost"
+
+            - name: N8N_PORT
+
+              value: "5678"
+
+            - name: N8N_PROTOCOLS
+
+              value: "http"
+
+            - name: NODE_ENV
+
+              value: "production"
+
+            - name: WEBHOOK_URL
+
+              value: "http://localhost:5678/"
+
+            - name: GENERIC_TIMEZONE
+
+              value: "America/Los_Angeles"
+
+          ports:
+
+            - containerPort: 5678
+
+          volumeMounts:
+
+            - name: data
+
+              mountPath: /home/node/.n8n
+
+      volumes:
+
+        - name: data
+
+          hostPath:
+
+            path: /home/hunter/docker/appdata/n8n
+

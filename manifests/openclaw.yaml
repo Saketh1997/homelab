@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openclaw
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: openclaw
+  template:
+    metadata:
+      labels:
+        app: openclaw
+    spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      runtimeClassName: nvidia
+      nodeSelector:
+        kubernetes.io/hostname: huntersmachinegun
+      containers:
+        - name: openclaw
+          image: ghcr.io/openclaw/openclaw:latest
+          command: ["node", "openclaw.mjs", "gateway", "--allow-unconfigured"]
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: "all"
+            - name: NVIDIA_DRIVER_CAPABILITIES
+              value: "compute,utility"
+          resources: {}
+          ports:
+            - containerPort: 18789
+            - containerPort: 18790
+          volumeMounts:
+            - name: config
+              mountPath: /home/node/.openclaw
+      volumes:
+        - name: config
+          hostPath:
+            path: /home/hunter/.openclaw

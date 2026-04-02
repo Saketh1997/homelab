@@ -1,0 +1,77 @@
+
+apiVersion: apps/v1
+
+kind: Deployment
+
+metadata:
+
+  name: kavita
+
+  namespace: default
+
+spec:
+
+  replicas: 1
+
+  selector:
+
+    matchLabels:
+
+      app: kavita
+
+  template:
+
+    metadata:
+
+      labels:
+
+        app: kavita
+
+    spec:
+
+      nodeSelector:
+
+        kubernetes.io/hostname: huntersmachinegun
+
+      containers:
+
+        - name: kavita
+
+          image: jvmilazz0/kavita:latest
+
+          env:
+
+            - name: TZ
+
+              value: "America/Los_Angeles"
+
+          ports:
+
+            - containerPort: 5000
+
+          volumeMounts:
+
+            - name: config
+
+              mountPath: /kavita/config
+
+            - name: media
+
+              mountPath: /library
+
+              subPath: Books
+
+      volumes:
+
+        - name: config
+
+          hostPath:
+
+            path: /home/hunter/docker/appdata/kavita/config
+
+        - name: media
+
+          persistentVolumeClaim:
+
+            claimName: serverspace-pvc
+

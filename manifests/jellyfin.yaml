@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jellyfin
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jellyfin
+  template:
+    metadata:
+      labels:
+        app: jellyfin
+    spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      runtimeClassName: nvidia
+      nodeSelector:
+        kubernetes.io/hostname: huntersmachinegun
+      containers:
+        - name: jellyfin
+          image: jellyfin/jellyfin:latest
+          env:
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: "all"
+            - name: NVIDIA_DRIVER_CAPABILITIES
+              value: "video,compute,utility"
+            - name: TZ
+              value: "America/Los_Angeles"
+          resources:
+            limits:
+              nvidia.com/gpu: 1
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: cache
+              mountPath: /cache
+            - name: media
+              mountPath: /media
+      volumes:
+        - name: config
+          hostPath:
+            path: /home/hunter/docker/appdata/jellyfin/config
+        - name: cache
+          hostPath:
+            path: /home/hunter/docker/appdata/jellyfin/cache
+        - name: media
+          persistentVolumeClaim:
+            claimName: serverspace-pvc

@@ -1,0 +1,8 @@
+*.secret
+*.key
+*.pem
+*.env
+**/*.db
+**/*.log
+**/cache/
+**/logs/

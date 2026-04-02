@@ -1,0 +1,62 @@
+# audiobookshelf.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: audiobookshelf
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: audiobookshelf
+  template:
+    metadata:
+      labels:
+        app: audiobookshelf
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: huntersmachinegun
+      containers:
+        - name: audiobookshelf
+          image: ghcr.io/advplyr/audiobookshelf:latest
+          ports:
+            - containerPort: 80
+          env:
+            - name: AUDIOBOOKSHELF_UID
+              value: "1000"
+            - name: AUDIOBOOKSHELF_GID
+              value: "1000"
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: metadata
+              mountPath: /metadata
+            - name: audiobooks
+              mountPath: /audiobooks
+      volumes:
+        - name: config
+          hostPath:
+            path: /home/hunter/docker/appdata/audiobookshelf/config
+            type: DirectoryOrCreate
+        - name: metadata
+          hostPath:
+            path: /home/hunter/docker/appdata/audiobookshelf/metadata
+            type: DirectoryOrCreate
+        - name: audiobooks
+          hostPath:
+            path: /mnt/ServerSpace/AudioBooks
+            type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: audiobookshelf
+  namespace: default
+spec:
+  selector:
+    app: audiobookshelf
+  type: NodePort
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 30378
